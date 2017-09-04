@@ -27,41 +27,15 @@ namespace IronLakeGame1
             base.OnActivate();
         }
 
-        public Dictionary<Movement.Direction, Enum[]> InputMap = new Dictionary<Movement.Direction, Enum[]>
-        {
-            {Movement.Direction.Up, new Enum[] {Buttons.DPadUp, Keys.W, Keys.Up}},
-            {Movement.Direction.Right, new Enum[] {Buttons.DPadRight, Keys.D, Keys.Right}},
-            {Movement.Direction.Down, new Enum[] {Buttons.DPadDown, Keys.S, Keys.Down}},
-            {Movement.Direction.Left, new Enum[] {Buttons.DPadLeft, Keys.A, Keys.Left}}
-        };
+        
         
         public override void Update(double elapsedSeconds, (int Width, int Height) viewport)
         {
-            Direction = Movement.Direction.None;
-
-            foreach (var direction in EnumExtensions.GetValues<Movement.Direction>().Where(d => d > Movement.Direction.None))
-                if (GetInput(InputMap[direction]))
-                    Direction = Direction | direction;
+            Direction = Movement.GetInputDirections();
 
             Move(elapsedSeconds);
 
             base.Update(elapsedSeconds, viewport);
-        }
-
-        private static bool GetInput(IEnumerable<Enum> inputs)
-        {
-            return inputs.Any(i =>
-            {
-                switch (i)
-                {
-                    case Buttons b:
-                        return GamePad.GetState(PlayerIndex.One).IsButtonDown(b);
-                    case Keys k:
-                        return Keyboard.GetState().IsKeyDown(k);
-                    default:
-                        return false;
-                }
-            });
         }
 
         private void Move(double elapsedSeconds)
