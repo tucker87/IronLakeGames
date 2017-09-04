@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
+using IronLake;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
-using TuckerGameToolbox;
 
-namespace SingalRSnake
+namespace IronLakeGame1
 {
     public class Player : GameObject
     {

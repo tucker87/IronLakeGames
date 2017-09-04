@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SingalRSnake
+namespace IronLakeGame1
 {
 #if WINDOWS || LINUX
     /// <summary>

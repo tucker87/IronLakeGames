@@ -9,8 +9,8 @@
     <ProjectGuid>{7DF440E5-210D-4574-8014-1A21B33D7CFE}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SingalRSnake</RootNamespace>
-    <AssemblyName>SingalRSnake</AssemblyName>
+    <RootNamespace>IronLakeGame1</RootNamespace>
+    <AssemblyName>IronLakeGame1</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <MonoGamePlatform>Windows</MonoGamePlatform>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
@@ -48,6 +48,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="IronLake">
+      <HintPath>..\..\IronLake\IronLake\bin\Debug\netstandard1.4\IronLake.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Build.Tasks.v4.0" />
     <Reference Include="MonoGame.Framework">
       <HintPath>$(MonoGameInstallDirectory)\MonoGame\v3.0\Assemblies\Windows\MonoGame.Framework.dll</HintPath>
@@ -57,9 +60,6 @@
       <HintPath>..\packages\System.ValueTuple.4.4.0\lib\netstandard1.0\System.ValueTuple.dll</HintPath>
     </Reference>
     <Reference Include="System.Xml" />
-    <Reference Include="TuckerGameToolbox">
-      <HintPath>..\..\TuckerGameToolbox\TuckerGameToolbox\bin\Debug\netstandard1.4\TuckerGameToolbox.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Icon.ico" />

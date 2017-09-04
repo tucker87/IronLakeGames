@@ -1,7 +1,7 @@
-﻿using Microsoft.Xna.Framework;
-using TuckerGameToolbox;
+﻿using IronLake;
+using Microsoft.Xna.Framework;
 
-namespace SingalRSnake
+namespace IronLakeGame1
 {
     public class Box : GameObject
     {
