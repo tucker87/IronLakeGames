@@ -33,10 +33,10 @@ namespace IronLakeGame1
 
         public void CheckOutOfBounds(int viewportWidth, int viewportHeight)
         {
-            if (Movement.IsTouchingOfBounds(Transform.Position.X, _spriteRenderer.Texture2D.Width, viewportWidth))
+            if (Movement.IsTouchingBounds(Transform.Position.X, _spriteRenderer.Texture2D.Width, viewportWidth))
                 XDirection = Movement.Directions[XDirection].Opposite;
 
-            if (Movement.IsTouchingOfBounds(Transform.Position.Y, _spriteRenderer.Texture2D.Height, viewportHeight))
+            if (Movement.IsTouchingBounds(Transform.Position.Y, _spriteRenderer.Texture2D.Height, viewportHeight))
                 YDirection = Movement.Directions[YDirection].Opposite;
         }
 
