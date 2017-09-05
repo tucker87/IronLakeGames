@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using IronLake;
+﻿using IronLake;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Input;
 
 namespace IronLakeGame1
 {
@@ -26,8 +22,6 @@ namespace IronLakeGame1
 
             base.OnActivate();
         }
-
-        
         
         public override void Update(double elapsedSeconds, (int Width, int Height) viewport)
         {

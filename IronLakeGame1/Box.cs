@@ -55,8 +55,8 @@ namespace IronLakeGame1
 
         public override void Update(double elapsedSeconds, (int Width, int Height) viewport)
         {
-            Move(elapsedSeconds);
             CheckOutOfBounds(viewport.Width, viewport.Height);
+            Move(elapsedSeconds);
         }
     }
 }
