@@ -85,11 +85,12 @@ namespace IronLakeGame1
             }
         }
 
-        public override void Update(double elapsedSeconds, (int Width, int Height) viewport)
+        public override void Update(double elapsedSeconds)
         {
             if (TryMove(elapsedSeconds, out var collidedWith, out var newBoundingBox))
                 return;
 
+            collidedWith?.OnCollision(collidedWith);
             OnCollision(collidedWith?.GetComponent<BoxCollider>(), newBoundingBox);
             TryMove(elapsedSeconds, out var _, out var _);
         }

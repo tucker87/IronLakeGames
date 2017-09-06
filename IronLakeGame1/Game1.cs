@@ -44,8 +44,8 @@ namespace IronLakeGame1
 
             _gameScene.GameObjects.Add(new Player()
                 .SetPosition(new Vector2(GraphicsDevice.Viewport.Width / 2, GraphicsDevice.Viewport.Height / 2))
-                .Add(new SpriteRenderer(playerTexture))
-                .Add(new BoxCollider(playerWidth, playerHeight)));
+                .AddComponent(new SpriteRenderer(playerTexture))
+                .AddComponent(new BoxCollider(playerWidth, playerHeight)));
 
             //MakeBoxes
             const int boxWidth = 80;
@@ -59,15 +59,32 @@ namespace IronLakeGame1
             texture2D.SetData(data);
 
             _gameScene.GameObjects.Add(new Box()
-                .Add(new SpriteRenderer(texture2D))
-                .Add(new BoxCollider(boxWidth, boxHeight)));
+                .AddComponent(new SpriteRenderer(texture2D))
+                .AddComponent(new BoxCollider(boxWidth, boxHeight)));
 
             _gameScene.GameObjects.Add(new Box()
                 .SetPosition(new Vector2(GraphicsDevice.Viewport.Width - 80, GraphicsDevice.Viewport.Height - 80))
-                .Add(new SpriteRenderer(texture2D))
-                .Add(new BoxCollider(boxWidth, boxHeight)));
+                .AddComponent(new SpriteRenderer(texture2D))
+                .AddComponent(new BoxCollider(boxWidth, boxHeight)));
             
             _gameScene.GameObjects.ForEach(go => go.Activate(_gameScene));
+            
+            //MakeHearts
+
+            const int heartWidth = 10;
+            const int heartHeight = 15;
+
+            var heartTexture = new Texture2D(GraphicsDevice, heartWidth, heartHeight);
+            var heartTextureData = new Color[heartWidth * heartHeight];
+            for (var i = 0; i < heartTextureData.Length; ++i)
+                heartTextureData[i] = Color.Chocolate;
+
+            heartTexture.SetData(heartTextureData);
+
+            _gameScene.UiElements.Add(new HeartContainer(heartTexture)
+                .SetPosition(new Vector2(10, 10)));
+
+            _gameScene.UiElements.ForEach(go => go.Activate(_gameScene));
 
             base.Initialize();
         }
@@ -106,7 +123,8 @@ namespace IronLakeGame1
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
             
-            _gameScene.GameObjects.ForEach(go => go.Update(gameTime.ElapsedGameTime.TotalSeconds, (GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height)));
+            _gameScene.GameObjects.ForEach(go => go.Update(gameTime.ElapsedGameTime.TotalSeconds));
+            _gameScene.UiElements.ForEach(ui => ui.Update(gameTime.ElapsedGameTime.TotalSeconds));
 
             base.Update(gameTime);
         }
@@ -120,11 +138,23 @@ namespace IronLakeGame1
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             _spriteBatch.Begin();
-            _gameScene.GameObjects.ForEach(go =>
-            {
-                var sr = go.GetComponent<SpriteRenderer>();
-                _spriteBatch.Draw(sr.Texture2D, go.Transform.Position, Color.White);
-            });
+            //Draw GameObjects
+            _gameScene.GameObjects
+                .Select(go => go.GetComponent<SpriteRenderer>())
+                .ForEach(sr => _spriteBatch.Draw(sr.Texture2D, sr.GameObject.Transform.Position, Color.White));
+
+            //Draw Ui
+            _gameScene.UiElements
+                .Select(ui => ui.GetComponent<SpriteRenderer>())
+                .Where(sr => sr != null)
+                .ForEach(sr => _spriteBatch.Draw(sr.Texture2D, sr.GameObject.Transform.Position, Color.White));
+
+            //Draw Ui Children
+            _gameScene.UiElements
+                .SelectMany(ui => ui.Children)
+                .Select(ui => ui.GetComponent<SpriteRenderer>())
+                .ForEach(sr => _spriteBatch.Draw(sr.Texture2D, sr.GameObject.Transform.Position, Color.White));
+
             _spriteBatch.End();
 
             base.Draw(gameTime);

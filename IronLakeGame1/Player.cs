@@ -16,20 +16,19 @@ namespace IronLakeGame1
         public override void OnActivate()
         {
             _boxCollider = GetComponent<BoxCollider>();
-            _boxCollider.OnCollision = OnCollision;
+            //_boxCollider.OnCollision = OnCollision;
 
             _spriteRenderer = GetComponent<SpriteRenderer>();
 
             base.OnActivate();
         }
         
-        public override void Update(double elapsedSeconds, (int Width, int Height) viewport)
+        public override void Update(double elapsedSeconds)
         {
             Direction = Movement.GetInputDirections();
-
             TryMove(elapsedSeconds);
 
-            base.Update(elapsedSeconds, viewport);
+            base.Update(elapsedSeconds);
         }
 
         private void TryMove(double elapsedSeconds)
@@ -68,11 +67,14 @@ namespace IronLakeGame1
 
             if(!collidingWith.Any())
                 Transform.Position = newPosition;
+            else
+                OnCollision(collidingWith.First());
         }
 
-        public void OnCollision(BoxCollider collidedWith)
+        public override void OnCollision(GameObject collidedWith)
         {
-
+            if(Health > 0)
+                Health--;
         }
     }
 }
