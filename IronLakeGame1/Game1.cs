@@ -14,10 +14,11 @@ namespace IronLakeGame1
     {
         private readonly GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
-        private List<GameObject> _gameObjects = new List<GameObject>();
-        
+        private GameScene _gameScene;
+
         public Game1()
         {
+            _gameScene = new GameScene(this);
             _graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
         }
@@ -31,8 +32,8 @@ namespace IronLakeGame1
         protected override void Initialize()
         {
             //MakePlayer
-            var playerWidth = 40;
-            var playerHeight = 40;
+            const int playerWidth = 40;
+            const int playerHeight = 40;
 
             var playerTexture = new Texture2D(GraphicsDevice, playerWidth, playerHeight);
             var playerTextureData = new Color[playerWidth * playerHeight];
@@ -41,14 +42,14 @@ namespace IronLakeGame1
 
             playerTexture.SetData(playerTextureData);
 
-            _gameObjects.Add(new Player()
+            _gameScene.GameObjects.Add(new Player()
                 .SetPosition(new Vector2(GraphicsDevice.Viewport.Width / 2, GraphicsDevice.Viewport.Height / 2))
                 .Add(new SpriteRenderer(playerTexture))
                 .Add(new BoxCollider(playerWidth, playerHeight)));
 
             //MakeBoxes
-            var boxWidth = 80;
-            var boxHeight = 80;
+            const int boxWidth = 80;
+            const int boxHeight = 80;
 
             var texture2D = new Texture2D(GraphicsDevice, boxWidth, boxHeight);
             var data = new Color[boxWidth * boxHeight];
@@ -57,16 +58,16 @@ namespace IronLakeGame1
 
             texture2D.SetData(data);
 
-            _gameObjects.Add(new Box()
+            _gameScene.GameObjects.Add(new Box()
                 .Add(new SpriteRenderer(texture2D))
                 .Add(new BoxCollider(boxWidth, boxHeight)));
 
-            _gameObjects.Add(new Box()
+            _gameScene.GameObjects.Add(new Box()
                 .SetPosition(new Vector2(GraphicsDevice.Viewport.Width - 80, GraphicsDevice.Viewport.Height - 80))
                 .Add(new SpriteRenderer(texture2D))
                 .Add(new BoxCollider(boxWidth, boxHeight)));
-
-            _gameObjects.ForEach(go => go.Activate());
+            
+            _gameScene.GameObjects.ForEach(go => go.Activate(_gameScene));
 
             base.Initialize();
         }
@@ -105,18 +106,7 @@ namespace IronLakeGame1
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
             
-            _gameObjects.Select(go => go.GetComponent<BoxCollider>()).ForEach(bc => bc?.BeforePhysics());
-
-            var collideables = _gameObjects.Select(go => go.GetComponent<BoxCollider>()).ToList();
-            for (var a = 0; a < collideables.Count; a++)
-                for (var b = a + 1; b < collideables.Count; b++)
-                if (collideables[a].BoundingBox.Intersects(collideables[b].BoundingBox))
-                {
-                    collideables[a].OnCollision(collideables[b]);
-                    collideables[b].OnCollision(collideables[a]);
-                }
-
-            _gameObjects.ForEach(go => go.Update(gameTime.ElapsedGameTime.TotalSeconds, (GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height)));
+            _gameScene.GameObjects.ForEach(go => go.Update(gameTime.ElapsedGameTime.TotalSeconds, (GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height)));
 
             base.Update(gameTime);
         }
@@ -130,7 +120,7 @@ namespace IronLakeGame1
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             _spriteBatch.Begin();
-            _gameObjects.ForEach(go =>
+            _gameScene.GameObjects.ForEach(go =>
             {
                 var sr = go.GetComponent<SpriteRenderer>();
                 _spriteBatch.Draw(sr.Texture2D, go.Transform.Position, Color.White);

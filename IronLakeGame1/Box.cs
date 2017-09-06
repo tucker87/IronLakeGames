@@ -1,4 +1,5 @@
-﻿using IronLake;
+﻿using System.Linq;
+using IronLake;
 using Microsoft.Xna.Framework;
 
 namespace IronLakeGame1
@@ -15,48 +16,82 @@ namespace IronLakeGame1
         public override void OnActivate()
         {
             _boxCollider = GetComponent<BoxCollider>();
-            _boxCollider.OnCollision = OnCollision;
 
             _spriteRenderer = GetComponent<SpriteRenderer>();
 
             base.OnActivate();
         }
 
-        public void Move(double elapsedSeconds)
+        public bool TryMove(double elapsedSeconds, out GameObject gameObject, out Rectangle newBoundingBox)
         {
+            var currentPosition = Transform.Position;
+
             var newPosition = new Vector2(
-                Transform.Position.X + Movement.LambdaMove(XSpeed, XDirection, elapsedSeconds),
-                Transform.Position.Y + Movement.LambdaMove(YSpeed, YDirection, elapsedSeconds));
+                currentPosition.X + Movement.LambdaMove(XSpeed, XDirection, elapsedSeconds),
+                currentPosition.Y + Movement.LambdaMove(YSpeed, YDirection, elapsedSeconds));
 
+            newBoundingBox = new Rectangle(
+                (int) newPosition.X, 
+                (int) newPosition.Y, 
+                _boxCollider.BoundingBox.Width, 
+                _boxCollider.BoundingBox.Height);
+
+            var collidingWith = Scene.CheckCollision(newBoundingBox)
+                .Where(go => go != this)
+                .ToList();
+
+            if (collidingWith.Any())
+            {
+                gameObject = collidingWith.First();
+                return false;
+            }
+
+            gameObject = null;
+
+            if (CheckBounds(newBoundingBox, Scene.Game.GraphicsDevice.Viewport.Width, Scene.Game.GraphicsDevice.Viewport.Height))
+                return false;
+            
             Transform.Position = newPosition;
+            return true;
         }
 
-        public void CheckOutOfBounds(int viewportWidth, int viewportHeight)
+        public bool CheckBounds(Rectangle boundingBox, int viewportWidth, int viewportHeight)
         {
-            if (Movement.IsTouchingBounds(Transform.Position.X, _spriteRenderer.Texture2D.Width, viewportWidth))
-                XDirection = Movement.Directions[XDirection].Opposite;
-
-            if (Movement.IsTouchingBounds(Transform.Position.Y, _spriteRenderer.Texture2D.Height, viewportHeight))
-                YDirection = Movement.Directions[YDirection].Opposite;
+            return Movement.IsTouchingBounds(boundingBox.X, boundingBox.Width, viewportWidth)
+                   || Movement.IsTouchingBounds(boundingBox.Y, boundingBox.Height, viewportHeight);
         }
 
-        public void OnCollision(BoxCollider collidedWith)
+        public void OnCollision(BoxCollider collidedWith, Rectangle boundingBox)
         {
-            var (depthX, depthY) = _boxCollider.BoundingBox.GetAbsIntersectionDepth(collidedWith.BoundingBox);
+            if (collidedWith != null)
+            {
+                var (depthX, depthY) = boundingBox.GetAbsIntersectionDepth(collidedWith.BoundingBox);
 
-            if (depthX == 0 && depthY == 0) //I know this will be dead on 0
-                return;
+                if (depthX == 0 && depthY == 0) //I know this will be dead on 0
+                    return;
 
-            if (depthX < depthY)
-                XDirection = Movement.Directions[XDirection].Opposite;
+                if (depthX < depthY)
+                    XDirection = Movement.Directions[XDirection].Opposite;
+                else
+                    YDirection = Movement.Directions[YDirection].Opposite;
+            }
             else
-                YDirection = Movement.Directions[YDirection].Opposite;
+            {
+                if(Movement.IsTouchingBounds(boundingBox.X, boundingBox.Width, Scene.Game.GraphicsDevice.Viewport.Width))
+                    XDirection = Movement.Directions[XDirection].Opposite;
+
+                if (Movement.IsTouchingBounds(boundingBox.Y, boundingBox.Height, Scene.Game.GraphicsDevice.Viewport.Height))
+                    YDirection = Movement.Directions[YDirection].Opposite;
+            }
         }
 
         public override void Update(double elapsedSeconds, (int Width, int Height) viewport)
         {
-            CheckOutOfBounds(viewport.Width, viewport.Height);
-            Move(elapsedSeconds);
+            if (TryMove(elapsedSeconds, out var collidedWith, out var newBoundingBox))
+                return;
+
+            OnCollision(collidedWith?.GetComponent<BoxCollider>(), newBoundingBox);
+            TryMove(elapsedSeconds, out var _, out var _);
         }
     }
 }

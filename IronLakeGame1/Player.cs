@@ -1,4 +1,5 @@
-﻿using IronLake;
+﻿using System.Linq;
+using IronLake;
 using Microsoft.Xna.Framework;
 
 namespace IronLakeGame1
@@ -11,8 +12,7 @@ namespace IronLakeGame1
         public int YSpeed = 3;
         private BoxCollider _boxCollider;
         private SpriteRenderer _spriteRenderer;
-        private bool _colliding;
-
+        
         public override void OnActivate()
         {
             _boxCollider = GetComponent<BoxCollider>();
@@ -27,19 +27,13 @@ namespace IronLakeGame1
         {
             Direction = Movement.GetInputDirections();
 
-            Move(elapsedSeconds);
+            TryMove(elapsedSeconds);
 
             base.Update(elapsedSeconds, viewport);
         }
 
-        private void Move(double elapsedSeconds)
+        private void TryMove(double elapsedSeconds)
         {
-            if (_colliding)
-            {
-                _colliding = false;
-                return;
-            }
-
             var x = Transform.Position.X;
             var xDirection = Direction.HasFlag(Movement.Direction.Left)
                 ? Movement.Direction.Left
@@ -62,12 +56,23 @@ namespace IronLakeGame1
             
             var newPosition = new Vector2(x, y);
 
-            Transform.Position = newPosition;
+            var newBoundingBox = new Rectangle(
+                (int)newPosition.X,
+                (int)newPosition.Y,
+                _boxCollider.BoundingBox.Width,
+                _boxCollider.BoundingBox.Height);
+
+            var collidingWith = Scene.CheckCollision(newBoundingBox)
+                .Where(go => go != this)
+                .ToList();
+
+            if(!collidingWith.Any())
+                Transform.Position = newPosition;
         }
 
         public void OnCollision(BoxCollider collidedWith)
         {
-            _colliding = true;
+
         }
     }
 }
